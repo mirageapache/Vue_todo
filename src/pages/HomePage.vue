@@ -1,7 +1,10 @@
 <script setup lang="ts">
   import { onMounted, reactive, ref } from 'vue';
   import FunctionalBar from '../components/FunctionalBar.vue';
-  const todoList = reactive<{ name: string, isCompleted: boolean }[]>([]);
+  import ListPanel from '../components/ListPanel.vue';
+  import type { TodoListType } from '../types/todoList';
+
+  const todoList = reactive<TodoListType[]>([]);
   const isHideCompleted = ref<boolean>(false);
   
   onMounted(() => {
@@ -16,6 +19,11 @@
     isHideCompleted.value = !isHideCompleted.value;
   }
 
+  /** 更新 todoList */
+  const updateTodoList = (newList: TodoListType[]) => {
+    todoList.splice(0, todoList.length, ...newList);
+    localStorage.setItem('todoList', JSON.stringify(todoList));
+  }
 </script>
 
 <template>
@@ -23,13 +31,7 @@
     <h1 class="banner">Todo List</h1>
     <div class="todoList">
       <FunctionalBar :todoList="todoList" :isHideCompleted="isHideCompleted" :hideCompleted="hideCompleted" />
-      <div class="todoItemList">
-        <p v-if="todoList.length === 0">No Todo items</p>
-        <div class="todoItem" v-else v-for="item in todoList">
-          <input type="checkbox" v-model="item.isCompleted" />
-          <p>{{ item.name }}</p>
-        </div>
-      </div>
+      <ListPanel :todoList="todoList" @update:todoList="updateTodoList" />
     </div>
   </div>  
 </template>
@@ -53,7 +55,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow-y: auto;
+  width: 100%;
+  height: 100%;
 }
 
 </style>
