@@ -5,7 +5,7 @@
   import type { TodoListType } from '../types/todoList';
 
   const todoList = reactive<TodoListType[]>([]);
-  const isHideCompleted = ref<boolean>(false);
+  const isHideCompleted = ref<boolean>(true);
   
   onMounted(() => {
     const localList = localStorage.getItem('todoList');
@@ -31,7 +31,7 @@
     <h1 class="banner">Todo List</h1>
     <div class="todoList">
       <FunctionalBar :todoList="todoList" :isHideCompleted="isHideCompleted" :hideCompleted="hideCompleted" />
-      <ListPanel :todoList="todoList" @update:todoList="updateTodoList" />
+      <ListPanel :todoList="todoList" @update:todoList="updateTodoList" :isHideCompleted="isHideCompleted" />
     </div>
   </div>  
 </template>
@@ -43,6 +43,10 @@
   left: 0;
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .banner {
@@ -56,8 +60,8 @@
   align-items: center;
   justify-content: center;
   width: 100%;
+  max-width: 1200px;
   height: 100%;
 }
-
 </style>
 

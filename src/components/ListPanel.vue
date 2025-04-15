@@ -1,13 +1,27 @@
 <script setup lang="ts">
+  import { computed, ref } from 'vue';
   import type { TodoListType } from '../types/todoList';
+  import swal from 'sweetalert2';
+
+  const editContent = ref<string>('');
+  const todoItems = ref<{ [key: string]: any }>({});
 
   const props = defineProps<{
     todoList: TodoListType[];
+    isHideCompleted: boolean;
   }>();
 
   const emit = defineEmits<{
     (e: 'update:todoList', value: TodoListType[]): void;
   }>();
+
+  /** 過濾隱藏項目 */
+  const filteredTodoList = computed(() => {
+    if (props.isHideCompleted) {
+      return props.todoList.filter(item => !item.isCompleted);
+    }
+    return props.todoList;
+  });
 
   /** 更新 todoList */
   const updateTodoList = (newList: TodoListType[]) => {
@@ -19,14 +33,25 @@
     const newList = props.todoList.map(todo => {
       if (todo.id === id) {
         todo.isEditing = isEditing;
+        editContent.value = todo.content;
       }
       return todo;
     }) as TodoListType[];
     updateTodoList(newList);
+    if (!isEditing) {
+      editContent.value = '';
+    }
   }
 
   /** 編輯todo */
   const editTodo = (id: string, value: string) => {
+    if (value.trim() === '') {
+      swal.fire({
+        text: '提醒你！待辦事項不能為空白',
+        icon: 'error',
+      });
+      return;
+    }
     const newList = props.todoList.map(todo => {
       if (todo.id === id) {
         todo.content = value;
@@ -39,32 +64,70 @@
 
   /** 刪除todo */
   const deleteTodo = (id: string) => {
-    const newList = props.todoList.filter(todo => todo.id !== id);
-    updateTodoList(newList);
+    swal.fire({
+      title: '確認刪除',
+      text: '確認刪除此待辦事項嗎？',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: '確認',
+      cancelButtonText: '取消',
+    }).then((result: any) => {
+      if (result.isConfirmed) {
+        const newList = props.todoList.filter(todo => todo.id !== id);
+        updateTodoList(newList);
+      }
+    });
+  }
+
+  /** 完成todo */
+  const completeTodo = (id: string, isCompleted: boolean) => {
+    const todoItem = todoItems.value[id];
+    if (todoItem) {
+      if (isCompleted && props.isHideCompleted) todoItem.classList.add('completing'); // 完成時顯示動畫
+      setTimeout(() => {
+        const newList = props.todoList.map(todo => {
+          if (todo.id === id) {
+            todo.isCompleted = isCompleted;
+          }
+          return todo;
+        }) as TodoListType[];
+        updateTodoList(newList);
+        todoItem.classList.remove('completing');
+      }, 1000);
+    }
   }
 
 </script>
 
 <template>
   <div class="todoItemList">
-    <p v-if="todoList.length === 0">無任何待辦事項</p>
-    <div class="todoItem" v-else v-for="item in todoList" :key="item.id">
+    <p v-if="filteredTodoList.length === 0">無任何待辦事項</p>
+    <div 
+      v-else 
+      v-for="item in filteredTodoList" 
+      :key="item.id"
+      class="todoItem"
+      :ref="el => { if (el) todoItems[item.id] = el }"
+    >
       <div>
-        <input class="checkbox" type="checkbox" v-model="item.isCompleted" @change="updateTodoList([...todoList])" />
+        <span>
+          <input class="checkBox" type="checkbox" :checked="item.isCompleted" @change="completeTodo(item.id, !item.isCompleted)" />
+        </span>
         <p class="todoContent" v-if="!item.isEditing">{{ item.content }}</p>
-        <input class="editInput" v-else type="text" v-model="item.content" />
+        <input class="editInput" v-else type="text" v-model="editContent" @keypress.enter="editTodo(item.id, editContent)" />
       </div>
       <div>
         <span v-if="!item.isEditing">
-          <button @click="handleIsEditing(item.id, true)">編輯</button>
-          <button @click="deleteTodo(item.id)">刪除</button>
+          <button class="btn btn-warning" @click="handleIsEditing(item.id, true)">編輯</button>
+          <button class="btn btn-danger" @click="deleteTodo(item.id)">刪除</button>
         </span>
         <span v-else>
-          <button @click="editTodo(item.id, item.content)">儲存</button>
-          <button @click="handleIsEditing(item.id, false)">取消</button>
+          <button class="btn btn-secondary" @click="handleIsEditing(item.id, false)">取消</button>
+          <button class="btn btn-success" @click="editTodo(item.id, editContent)">儲存</button>
         </span>
       </div>
-      
     </div>
   </div>
 </template>
@@ -83,10 +146,18 @@
   gap: 10px;
   border-radius: 5px;
   padding: 5px 10px;
+  height: 50px;
+  transition: all 0.3s ease;
 }
 .todoItem:hover {
-  background-color: #ccc;
+  background-color: #eee;
   transition: background-color 0.1s ease;
+}
+
+.todoItem.completing {
+  opacity: 0;
+  transform: translateX(-100%);
+  transition: all 1s ease;
 }
 
 .todoItem div,
@@ -97,7 +168,8 @@
   gap: 10px;
 }
 
-.checkbox {
+.checkBox {
+  display: block;
   width: 18px;
   height: 18px;
 }
@@ -116,5 +188,4 @@
   border-radius: 4px;
   font-size: 16px;
 }
-
 </style>

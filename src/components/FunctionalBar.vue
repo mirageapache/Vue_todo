@@ -33,9 +33,9 @@
       <input class="todoInput" type="text" v-model="todo" placeholder="add a Todo" @keypress.enter="addTodo"/>
       <FontAwesomeIcon class="clear-icon"  :icon="faXmark" @click="() => { todo = '' }" />
     </span>
-    <button class="addButton" @click="addTodo">新增</button>
+    <button class="btn btn-primary" @click="addTodo">新增</button>
     <span class="functionalButton">
-      <button class="hideButton" type="button" @click="hideCompleted">
+      <button class="btn btn-light" type="button" @click="hideCompleted">
         {{ isHideCompleted ? '顯示已完成項目' : '隱藏已完成項目' }}
       </button>
     </span>
@@ -58,14 +58,6 @@
 .input-wrapper {
   position: relative;
   display: inline-block;
-}
-
-.addButton {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  padding: 8px 10px;
-  border-radius: 5px;
 }
 
 .clear-icon {
@@ -95,17 +87,4 @@
   top:0;
   right: 10px;
 }
-
-.hideButton {
-  border: 1px solid #ccc;
-  background-color: #fff;
-  font-size: 16px;
-  padding: 8px 10px;
-  border-radius: 5px;
-}
-.hideButton:hover {
-  background-color: #eee;
-  transition: background-color 0.3s ease;
-}
-
 </style>
