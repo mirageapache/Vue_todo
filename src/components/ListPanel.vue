@@ -2,6 +2,8 @@
   import { computed, ref } from 'vue';
   import type { TodoListType } from '../types/todoList';
   import swal from 'sweetalert2';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faCheck, faPencil, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
 
   const editContent = ref<string>('');
   const todoItems = ref<{ [key: string]: any }>({});
@@ -120,12 +122,20 @@
       </div>
       <div>
         <span v-if="!item.isEditing">
-          <button class="btn btn-warning" @click="handleIsEditing(item.id, true)">編輯</button>
-          <button class="btn btn-danger" @click="deleteTodo(item.id)">刪除</button>
+          <button class="btn btn-icon editButton" @click="handleIsEditing(item.id, true)">
+            <FontAwesomeIcon :icon="faPencil" />
+          </button>
+          <button class="btn btn-icon deleteButton" @click="deleteTodo(item.id)">
+            <FontAwesomeIcon :icon="faTrash" />
+          </button>
         </span>
         <span v-else>
-          <button class="btn btn-secondary" @click="handleIsEditing(item.id, false)">取消</button>
-          <button class="btn btn-success" @click="editTodo(item.id, editContent)">儲存</button>
+          <button class="btn btn-icon btn-danger" @click="handleIsEditing(item.id, false)">
+            <FontAwesomeIcon :icon="faXmark" />
+          </button>
+          <button class="btn btn-icon btn-success" @click="editTodo(item.id, editContent)">
+            <FontAwesomeIcon :icon="faCheck" />
+          </button>
         </span>
       </div>
     </div>
@@ -150,7 +160,7 @@
   transition: all 0.3s ease;
 }
 .todoItem:hover {
-  background-color: #eee;
+  background-color: #f6f6f6;
   transition: background-color 0.1s ease;
 }
 
@@ -188,4 +198,19 @@
   border-radius: 4px;
   font-size: 16px;
 }
+
+.editButton {
+  color: #ff9b0f;
+}
+.editButton:hover {
+  color: #e48704;
+}
+
+.deleteButton {
+  color: #d9534f;
+}
+.deleteButton:hover {
+  color: #d41f19;
+}
+
 </style>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import { ref } from 'vue';
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-  import { faXmark } from '@fortawesome/free-solid-svg-icons';
+  import { faEye, faEyeSlash, faXmark } from '@fortawesome/free-solid-svg-icons';
   import type { TodoListType } from '../types/todoList';
 
   const props = defineProps<{
@@ -36,7 +36,7 @@
     <button class="btn btn-primary" @click="addTodo">新增</button>
     <span class="functionalButton">
       <button class="btn btn-light" type="button" @click="hideCompleted">
-        {{ isHideCompleted ? '顯示已完成項目' : '隱藏已完成項目' }}
+        <FontAwesomeIcon :icon="isHideCompleted ? faEyeSlash : faEye" style="color: #666; width: 20px;" />
       </button>
     </span>
   </div>
